@@ -1,4 +1,4 @@
 /* eslint-disable no-undef */
 export default async function globalTeardown() {
-  await global._MONGOINSTANCE.stop()
+  await global.__MONGOINSTANCE.stop()
 }
