@@ -12,5 +12,14 @@
       "jsx": true
     }
   },
-  "extends": ["eslint:recommended", "prettier"]
+  "plugins": ["react"],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "prettier"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "rules": {
+      "react/react-in-jsx-scope": "off"
+    }
+  }
 }
