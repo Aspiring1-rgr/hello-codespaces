@@ -1,3 +1,4 @@
+import React from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createPost } from '../api/posts.js'
 import { useState } from 'react'
