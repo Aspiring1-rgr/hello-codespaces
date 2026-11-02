@@ -6,7 +6,17 @@ export const AuthContext = createContext({
   setToken: () => {},
 })
 export const AuthContextProvider = ({ children }) => {
-  const [token, setToken] = useState(null)
+  const [token, setTokenState] = useState(() => {
+    return localStorage.getItem('token') || null
+  })
+  const setToken = (newToken) => {
+    if (newToken) {
+      localStorage.setItem('token', newToken)
+    } else {
+      localStorage.removeItem('token')
+    }
+    setTokenState(newToken)
+  }
   return (
     <AuthContext.Provider value={{ token, setToken }}>
       {children}

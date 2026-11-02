@@ -5,6 +5,10 @@ const postSchema = new Schema(
     author: { type: Schema.Types.ObjectId, ref: 'user', required: true },
     contents: String,
     tags: [String],
+    imageUrl: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true },
 )

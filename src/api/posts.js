@@ -3,6 +3,9 @@ export const getPosts = async (queryParams) => {
     `${import.meta.env.VITE_BACKEND_URL}/posts?` +
       new URLSearchParams(queryParams),
   )
+  if (!res.ok) {
+    throw new Error('Failed to retrieve recipes.')
+  }
   return await res.json()
 }
 export const createPost = async (token, post) => {
@@ -14,5 +17,8 @@ export const createPost = async (token, post) => {
     },
     body: JSON.stringify(post),
   })
+  if (!res.ok) {
+    throw new Error('Failed to create recipe.')
+  }
   return await res.json()
 }
