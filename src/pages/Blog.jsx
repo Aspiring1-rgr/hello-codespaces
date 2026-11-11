@@ -7,6 +7,8 @@ import { Header } from '../components/Header.jsx'
 import { useQuery } from '@tanstack/react-query'
 import { getPosts } from '../api/posts.js'
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
+//import PropTypes from 'prop-types'
 
 export function Blog() {
   const [author, setauthor] = useState('')
@@ -19,6 +21,13 @@ export function Blog() {
   const posts = postsQuery.data ?? []
   return (
     <div style={{ padding: 8 }}>
+      <Helmet>
+        <title>Richards Recipe Blog</title>
+        <meta
+          name='description'
+          content='A blog full of articles about delicious food recipes.'
+        />
+      </Helmet>
       <h1>Welcome to My Blog!</h1>
       <Header />
       <br />

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://legendary-computing-machine-jjxgv657q7phpgpx-5173.app.github.dev/sitemap.xml
