@@ -1,31 +1,61 @@
-import React from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import { useMutation as useGraphQLMutation } from '@apollo/client/react/index.js'
+import {
+  CREATE_POST,
+  GET_POSTS,
+  GET_POSTS_BY_AUTHOR,
+} from '../api/graphql/posts.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
-import { createPost } from '../api/posts.js'
-import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import slug from 'slug'
+
 export function CreatePost() {
   const [title, setTitle] = useState('')
   const [contents, setContents] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [token] = useAuth()
-  const queryClient = useQueryClient()
-  const createPostMutation = useMutation({
-    mutationFn: () => createPost(token, { title, contents, imageUrl }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] })
-      setTitle('')
-      setContents('')
-      setImageUrl('')
+
+  const [createPost, { loading, data, error }] = useGraphQLMutation(
+    CREATE_POST,
+    {
+      variables: {
+        title,
+        contents,
+        imageUrl,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+      refetchQueries: [GET_POSTS, GET_POSTS_BY_AUTHOR],
     },
-  })
-  const handleSubmit = (e) => {
+  )
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    createPostMutation.mutate()
+
+    try {
+      const result = await createPost()
+
+      if (result.data?.createPost) {
+        setTitle('')
+        setContents('')
+        setImageUrl('')
+      }
+    } catch (err) {
+      console.error('Error creating recipe:', err)
+    }
   }
-  if (!token) return <div>Please log in to create new posts.</div>
+
+  if (!token) {
+    return <div>Please log in to create new posts.</div>
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <h2>Create a Recipe</h2>
+
       <div>
         <label htmlFor='create-title'>Recipe Name: </label>
         <input
@@ -36,16 +66,20 @@ export function CreatePost() {
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
+
       <br />
+
       <div>
-        <label htmlFor='create-contents'>Recipe Instructions: </label>
+        <label htmlFor='create-contents'>Recipe Instructions:</label>
         <textarea
           id='create-contents'
           value={contents}
           onChange={(e) => setContents(e.target.value)}
         />
       </div>
+
       <br />
+
       <div>
         <label htmlFor='create-image'>Recipe Image URL: </label>
         <input
@@ -57,15 +91,28 @@ export function CreatePost() {
           placeholder='https://example.com/recipe.jpg'
         />
       </div>
+
       <br />
+
       <input
         type='submit'
-        value={createPostMutation.isPending ? 'Creating...' : 'Create'}
-        disabled={!title || !contents || createPostMutation.isPending}
+        value={loading ? 'Creating...' : 'Create'}
+        disabled={!title || !contents || loading}
       />
-      {createPostMutation.isSuccess ? (
+
+      {error && (
+        <p style={{ color: 'red' }}>Error creating recipe: {error.message}</p>
+      )}
+
+      {data?.createPost ? (
         <>
           <br />
+          Post{' '}
+          <Link
+            to={`/posts/${data.createPost.id}/${slug(data.createPost.title)}`}
+          >
+            {data.createPost.title}
+          </Link>
           <p>Recipe created successfully!</p>
         </>
       ) : null}
