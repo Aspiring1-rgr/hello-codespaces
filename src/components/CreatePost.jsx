@@ -24,11 +24,10 @@ export function CreatePost() {
         imageUrl,
       },
       context: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       },
       refetchQueries: [GET_POSTS, GET_POSTS_BY_AUTHOR],
+      awaitRefetchQueries: true,
     },
   )
 

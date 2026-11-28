@@ -5,11 +5,38 @@ export async function createPost(userId, { title, contents, tags, imageUrl }) {
   const post = new Post({ title, author: userId, contents, tags, imageUrl })
   return await post.save()
 }
-async function listPosts(
+export async function listPosts(
   query = {},
   { sortBy = 'createdAt', sortOrder = 'descending' } = {},
 ) {
-  return await Post.find(query).sort({ [sortBy]: sortOrder })
+  if (sortBy === 'likeCount') {
+    const direction = sortOrder === 'ascending' ? 1 : -1
+
+    return await Post.aggregate([
+      {
+        $match: query,
+      },
+      {
+        $addFields: {
+          likeCount: {
+            $size: {
+              $ifNull: ['$likes', []],
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          likeCount: direction,
+          _id: 1,
+        },
+      },
+    ])
+  }
+
+  return await Post.find(query).sort({
+    [sortBy]: sortOrder,
+  })
 }
 export async function listAllPosts(options) {
   return await listPosts({}, options)
@@ -38,4 +65,33 @@ export async function updatePost(
 }
 export async function deletePost(userId, postId) {
   return await Post.deleteOne({ _id: postId, author: userId })
+}
+export async function likePost(userId, postId) {
+  return await Post.findByIdAndUpdate(
+    postId,
+    {
+      $addToSet: {
+        likes: userId,
+      },
+    },
+    {
+      new: true,
+      timestamps: false,
+    },
+  )
+}
+
+export async function unlikePost(userId, postId) {
+  return await Post.findByIdAndUpdate(
+    postId,
+    {
+      $pull: {
+        likes: userId,
+      },
+    },
+    {
+      new: true,
+      timestamps: false,
+    },
+  )
 }
